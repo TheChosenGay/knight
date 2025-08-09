@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=4 uid="uid://7lnswyjgdb7h"]
+
+[ext_resource type="TileSet" uid="uid://q14ywmbe3h01" path="res://resources/floor.tres" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://mvgie3ig0v4j" path="res://scenes/player.tscn" id="2_0wfyh"]
+
+[node name="Main" type="Node2D"]
+
+[node name="frontActivedLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAHAA0AAQAAAAAAAAAUAA0AAQAAAAAAAAAhAA0AAQAAAAAAAAD5/w0AAQAAAAAAAAAuAA0AAQAAAAAAAAA7AA0AAQAAAAAAAADw/w0AAQAAAAAAAAA=")
+tile_set = ExtResource("1_o5qli")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(362, 154)
+
+[node name="Player" parent="." instance=ExtResource("2_0wfyh")]
+position = Vector2(320, 55)
