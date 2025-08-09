@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://diklffctgo3at"]
+
+[ext_resource type="Script" uid="uid://dtv2y4vgqd2k1" path="res://scenes/Characters/Player/state/PlayerIdleState.cs" id="1_bjtua"]
+
+[node name="PlayerIdleState" type="Node"]
+script = ExtResource("1_bjtua")
+name = "Idle"
+animationName = "idle"
+metadata/_custom_type_script = "uid://dmych5v5u7cq8"

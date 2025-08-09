@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://mvgie3ig0v4j"]
+[gd_scene load_steps=33 format=3 uid="uid://mvgie3ig0v4j"]
 
 [ext_resource type="Script" uid="uid://d1n3u3v800c2e" path="res://scenes/Characters/Player/Player.cs" id="1_smehm"]
 [ext_resource type="Texture2D" uid="uid://cwv0qsbug1qjl" path="res://assets/player/fall/0.png" id="2_4r5pv"]
@@ -26,6 +26,10 @@
 [ext_resource type="Texture2D" uid="uid://b0tgtscv861jv" path="res://assets/player/walk/5.png" id="23_wnwbv"]
 [ext_resource type="Texture2D" uid="uid://ccg0ijppqbrme" path="res://assets/player/walk/6.png" id="24_gl8cc"]
 [ext_resource type="Texture2D" uid="uid://btvlmh4omem5i" path="res://assets/player/walk/7.png" id="25_487ah"]
+[ext_resource type="AudioStream" uid="uid://dlcjxyly1ka0c" path="res://assets/audio/player/walljump.mp3" id="27_31cv2"]
+[ext_resource type="PackedScene" uid="uid://c1248a3a08f5u" path="res://scenes/StateMachine/state_machine.tscn" id="28_dt7fs"]
+[ext_resource type="PackedScene" uid="uid://diklffctgo3at" path="res://scenes/Characters/Player/state/player_idle_state.tscn" id="29_wqfne"]
+[ext_resource type="PackedScene" uid="uid://vrm8fxm58weh" path="res://scenes/Characters/Player/state/player_jump_state.tscn" id="30_wqfne"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jej6c"]
 animations = [{
@@ -151,3 +155,16 @@ vframes = 10
 frame = 1
 region_enabled = true
 region_rect = Rect2(2, 0, 972, 802)
+
+[node name="AudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("27_31cv2")
+pitch_scale = 0.5
+
+[node name="StateMachine" parent="." instance=ExtResource("28_dt7fs")]
+initialStateName = "Idle"
+
+[node name="PlayerIdleState" parent="StateMachine" node_paths=PackedStringArray("player") instance=ExtResource("29_wqfne")]
+player = NodePath("../..")
+
+[node name="PlayerJumpState" parent="StateMachine" node_paths=PackedStringArray("player") instance=ExtResource("30_wqfne")]
+player = NodePath("../..")

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://vrm8fxm58weh"]
+
+[ext_resource type="Script" uid="uid://baiguhyeav50q" path="res://scenes/Characters/Player/state/PlayerJumpState.cs" id="1_udsvd"]
+
+[node name="PlayerJumpState" type="Node"]
+script = ExtResource("1_udsvd")
+name = "Jump"
+animationName = "jump"
+metadata/_custom_type_script = "uid://dmych5v5u7cq8"

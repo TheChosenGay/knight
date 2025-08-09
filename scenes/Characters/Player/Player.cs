@@ -1,25 +1,37 @@
+using System.Drawing;
 using Godot;
+using Knight.State.PlayerState;
+using Knight.State.StateMachine;
 
-public partial class Player : CharacterBody2D
+public partial class Player : CharacterBody2D, IPlayerContextProtocol
 {
     private float moveSpeed;
-    private float jumpSpeed;
     private float gravity;
-    private bool isCanJump;
-    private bool isShorJumping;
-    private float jumpDistance;
 
     private float accHorDelta;
+    private Vector2 playerDirection;
 
     private AnimatedSprite2D animationPlayer;
     private CollisionShape2D collisionShape;
+    private AudioStreamPlayer2D audioPlayer;
+    private StateMachine stateMachine;
+    private bool isCouldPlayAudio;
+    private Timer audioTimer;
 
     public override void _Ready()
     {
         animationPlayer = GetNode<AnimatedSprite2D>("Animation");
         collisionShape = GetNode<CollisionShape2D>("CollisionShape2D");
-
+        audioPlayer = GetNode<AudioStreamPlayer2D>("AudioPlayer");
+        stateMachine = GetNode<StateMachine>("StateMachine");
+        audioTimer = new Timer();
+        audioTimer.Timeout += () =>
+        {
+            isCouldPlayAudio = true;
+        };
+        AddChild(audioTimer);
         Init();
+        stateMachine.StartMachine();
     }
 
 
@@ -29,52 +41,39 @@ public partial class Player : CharacterBody2D
     {
     }
 
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        base._UnhandledInput(@event);
+        UpdateDirection();
+    }
+
+
     public override void _PhysicsProcess(double delta)
     {
-        var dir = GetDirection();
+        stateMachine.StateMachinePhysicsProcess(delta);
+        // var dir = GetDirection();
 
-        var velocity = Velocity;
+        // var velocity = Velocity;
 
-        accHorDelta += (float)delta;
-      
-        if (isCanJump && dir.Y < 0)
-        {
-            velocity.Y = dir.Y * jumpSpeed;
-            isCanJump = false;
-        }
+        // accHorDelta += (float)delta;
 
-        jumpDistance += -(float)(velocity.Y * delta);
-        if (!IsOnFloor() && velocity.Y < 0 && jumpDistance < 120) 
-        {
-            isShorJumping = !Input.IsActionPressed("jump");
-        }
+        // var horDelta = IsOnFloor() ? accHorDelta / (float)2.0 : accHorDelta / (float)100.0;
+        // velocity.X = (dir.X != 0) ? dir.X * moveSpeed : Mathf.Lerp(0, velocity.X, Mathf.Pow(2, -horDelta));
 
-        var horDelta = IsOnFloor() || isShorJumping ? accHorDelta / (float)2.0 : accHorDelta / (float)100.0;
-        velocity.X = (dir.X != 0) ? dir.X * moveSpeed : Mathf.Lerp(0, velocity.X, Mathf.Pow(2, -horDelta));
-     
+        // Callable.From(() =>
+        // {
+        //     if (IsOnFloor())
+        //     {
+        //         Velocity = new Vector2(Velocity.X, 0);
+        //         if (Velocity.X == 0) accHorDelta = 0;
+        //     }
 
-        var realGravity = isShorJumping ? gravity * 5 : gravity;
-        velocity.Y += realGravity * (float)delta;
-        velocity.Y = Mathf.Clamp(velocity.Y, -500, 500);
+        //     PlayAnimation(velocity);
+        // }).CallDeferred();
 
-
-        Callable.From(() =>
-        {
-            if (IsOnFloor())
-            {
-                Velocity = new Vector2(Velocity.X, 0);
-                isCanJump = true;
-                isShorJumping = false;
-                jumpDistance = 0;
-                if(Velocity.X == 0) accHorDelta = 0;
-            }
-
-            PlayAnimation(velocity);
-        }).CallDeferred();
-
-        Velocity = velocity;
+        // Velocity = velocity;
         MoveAndSlide();
-        
+
     }
 
     private void PlayAnimation(Vector2 velocity)
@@ -87,33 +86,41 @@ public partial class Player : CharacterBody2D
         if (IsOnFloor())
         {
             var aniName = Mathf.Abs(velocity.X) > 100 ? "run" : "idle";
+            animationPlayer.SpeedScale = aniName == "run" ? 0.1f : 1.0f;
             animationPlayer.SpeedScale = 2.0f;
             animationPlayer.Play(aniName);
+            if (aniName == "run")
+            {
+                PlayAudio();
+            }
         }
         else
         {
-            var animationName = velocity.Y > 0 ? "fall" : "jump";
-            float shapeHeight = velocity.Y > 0 ? (float)120.0 : (float)134.0;
-            ((RectangleShape2D)collisionShape.Shape).Size = new Vector2((float)40.0, shapeHeight);
-            animationPlayer.SpeedScale = (float)0.3;
-            animationPlayer.Play(animationName);
         }
+
     }
 
+    private void PlayAudio()
+    {
+        if (!audioPlayer.Playing && isCouldPlayAudio)
+        {
+            audioPlayer.Play();
+            isCouldPlayAudio = false;
+            audioTimer.Start(0.1);
+            GD.Print("PlayAudio");
+        }
+    }
 
 
     private void Init()
     {
         gravity = 800;
         moveSpeed = 300;
-        jumpSpeed = 500;
-        jumpDistance = 0;
         accHorDelta = 0;
+        isCouldPlayAudio = true;
 
-        isCanJump = IsOnFloor();
-        isShorJumping = false;
     }
-    private Vector2 GetDirection()
+    private void UpdateDirection()
     {
         Vector2 direction = new(0, 0);
         direction.X = Input.GetActionStrength("move_right") - Input.GetActionStrength("move_left");
@@ -121,7 +128,39 @@ public partial class Player : CharacterBody2D
         {
             direction.Y = -Input.GetActionStrength("jump");
         }
-        return direction;
+        playerDirection = direction;
     }
-    
+
+
+    // MARK: IPlayerContextProtocol
+
+    public CharacterBody2D GetPlayer()
+    {
+        return this;
+    }
+    // 音频和动画相关
+    public AnimatedSprite2D GetAnimationPlayer()
+    {
+        return animationPlayer;
+    }
+    public AudioStreamPlayer2D GetAudioStreamPlayer()
+    {
+        return audioPlayer;
+    }
+    public void SetCollisionShapeSize(Vector2 size)
+    {
+        ((RectangleShape2D)collisionShape.Shape).Size = size;
+    }
+
+    // 逻辑判断相关
+    public Vector2 GetDirection()
+    {
+        return playerDirection;
+    }
+
+    public float GetPlayerGravity()
+    {
+        return gravity;
+    }
+
 }
