@@ -10,7 +10,7 @@ public partial class State : Node
 
     [Export]
     public String name { private set; get; }
-    
+
     [Signal]
     public delegate void StateChangeEventHandler(String stateName);
 

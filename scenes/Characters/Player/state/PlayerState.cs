@@ -17,6 +17,7 @@ public interface IPlayerContextProtocol
     // 移动相关
     public Vector2 GetVelocity();
     public void SetVelocity(Vector2 velocity);
+    public Vector2 GetRealVelocity();
     public float GetPlayerGravity();
 
 

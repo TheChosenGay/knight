@@ -16,17 +16,19 @@ public partial class PlayerJumpState : PlayerState
     public override void _Ready()
     {
         base._Ready();
-        jumpSpeed = 500;
+        jumpSpeed = 600;
+        jumpMoveSpeed = 300;
         jumpDistance = 0;
         accJumpDelta = 0;
-        jumpMoveSpeed = 300;
     }
 
 
     public override void Enter()
     {
         base.Enter();
-
+        isCanJump = false;
+        jumpDistance = 0;
+        context.SetVelocity(new Vector2(0, -jumpSpeed));
     }
 
 
@@ -34,6 +36,9 @@ public partial class PlayerJumpState : PlayerState
     public override void Exit()
     {
         base.Exit();
+        isCanJump = true;
+        isShorJumping = false;
+        jumpDistance = 0;
     }
 
     public override void StatePhysicsProcess(double delta)
@@ -42,47 +47,38 @@ public partial class PlayerJumpState : PlayerState
         var dir = context.GetDirection();
         var velocity = context.GetVelocity();
 
-        if (isCanJump && dir.Y < 0)
-        {
-            velocity.Y = dir.Y * jumpSpeed;
-            isCanJump = false;
-        }
         var jumpDelta = isShorJumping ? accJumpDelta / (float)2.0 : accJumpDelta / (float)100.0;
         velocity.X = (dir.X != 0) ? dir.X * jumpMoveSpeed : Mathf.Lerp(0, velocity.X, Mathf.Pow(2, -jumpDelta));
 
         jumpDistance += -(float)(velocity.Y * delta);
 
-        if (!context.IsOnFloor() && velocity.Y < 0 && jumpDistance < 120)
-        {
+        if (!context.IsOnFloor() && velocity.Y < 0 && jumpDistance < 100)
+        { // 刚跳起阶段，判断是否为短跳
             isShorJumping = !Input.IsActionPressed("jump");
         }
-
         var realGravity = isShorJumping ? gravity * 5 : gravity;
         velocity.Y += realGravity * (float)delta;
         velocity.Y = Mathf.Clamp(velocity.Y, -500, 500);
 
+
+        context.SetVelocity(velocity);
+
         Callable.From(() =>
         {
-            isCanJump = true;
-            isShorJumping = false;
-            jumpDistance = 0;
             PlayAnimationAndAudio(velocity);
-            JudgeState(dir);
-
+            JudgeState(velocity);
         }).CallDeferred();
-        context.SetVelocity(velocity);
     }
 
-    private void JudgeState(Vector2 dir)
+    private void JudgeState(Vector2 velocity)
     {
-
         if (context.IsOnFloor())
-            {
-            if (dir == Vector2.Zero)
+        {
+            if (velocity.X == 0)
             {
                 EmitSignal(SignalName.StateChange, "Idle");
             }
-            else
+            else if (velocity.X != 0)
             {
                 EmitSignal(SignalName.StateChange, "Run");
             }
@@ -93,8 +89,10 @@ public partial class PlayerJumpState : PlayerState
     {
         var animationName = velocity.Y > 0 ? "fall" : "jump";
         float shapeHeight = velocity.Y > 0 ? (float)120.0 : (float)134.0;
+        bool flipx = velocity.X < 0;
         context.SetCollisionShapeSize(new Vector2((float)40.0, shapeHeight));
         context.GetAnimationPlayer().SpeedScale = (float)0.3;
+        context.GetAnimationPlayer().FlipH = flipx;
         context.GetAnimationPlayer().Play(animationName);
         if (animationName == "jump" && jumpDistance < 20 && velocity.Y < 0)
         {

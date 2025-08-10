@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://u1jalifduw8n"]
+
+[ext_resource type="Script" uid="uid://bhv7xh2kd6toy" path="res://scenes/Characters/Player/state/PlayerRunState.cs" id="1_idrnf"]
+
+[node name="PlayerRunState" type="Node"]
+script = ExtResource("1_idrnf")
+animationName = "run"
+name = "Run"

@@ -32,6 +32,9 @@ public partial class Player : CharacterBody2D, IPlayerContextProtocol
         AddChild(audioTimer);
         Init();
         stateMachine.StartMachine();
+
+        // 设置碰撞黏着距离
+        FloorSnapLength = 0;
     }
 
 
@@ -51,53 +54,7 @@ public partial class Player : CharacterBody2D, IPlayerContextProtocol
     public override void _PhysicsProcess(double delta)
     {
         stateMachine.StateMachinePhysicsProcess(delta);
-        // var dir = GetDirection();
-
-        // var velocity = Velocity;
-
-        // accHorDelta += (float)delta;
-
-        // var horDelta = IsOnFloor() ? accHorDelta / (float)2.0 : accHorDelta / (float)100.0;
-        // velocity.X = (dir.X != 0) ? dir.X * moveSpeed : Mathf.Lerp(0, velocity.X, Mathf.Pow(2, -horDelta));
-
-        // Callable.From(() =>
-        // {
-        //     if (IsOnFloor())
-        //     {
-        //         Velocity = new Vector2(Velocity.X, 0);
-        //         if (Velocity.X == 0) accHorDelta = 0;
-        //     }
-
-        //     PlayAnimation(velocity);
-        // }).CallDeferred();
-
-        // Velocity = velocity;
         MoveAndSlide();
-
-    }
-
-    private void PlayAnimation(Vector2 velocity)
-    {
-        animationPlayer.SpeedScale = (float)1.0;
-        if (velocity.X != 0)
-        {
-            animationPlayer.FlipH = velocity.X < 0;
-        }
-        if (IsOnFloor())
-        {
-            var aniName = Mathf.Abs(velocity.X) > 100 ? "run" : "idle";
-            animationPlayer.SpeedScale = aniName == "run" ? 0.1f : 1.0f;
-            animationPlayer.SpeedScale = 2.0f;
-            animationPlayer.Play(aniName);
-            if (aniName == "run")
-            {
-                PlayAudio();
-            }
-        }
-        else
-        {
-        }
-
     }
 
     private void PlayAudio()
@@ -114,7 +71,7 @@ public partial class Player : CharacterBody2D, IPlayerContextProtocol
 
     private void Init()
     {
-        gravity = 800;
+        gravity = 1200;
         moveSpeed = 300;
         accHorDelta = 0;
         isCouldPlayAudio = true;

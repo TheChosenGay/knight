@@ -27,29 +27,23 @@ public partial class PlayerIdleState : PlayerState
     {
         base.StatePhysicsProcess(delta);
         var dir = context.GetDirection();
-        if (dir == Vector2.Zero)
-        {
-            var velocity = context.GetVelocity();
-            velocity.Y += gravity * (float)delta;
-            if (context.IsOnFloor())
-            {
-                velocity.Y = 0;
-            }
-            context.SetVelocity(velocity);
-            return;
-        }
 
-        if (dir.Y < 0)
+        Callable.From(() =>
         {
-            EmitSignal(SignalName.StateChange, "Jump");
-        }
-        else
-        {
-            if (dir.X != 0)
+
+            if (dir.Y < 0 || !context.IsOnFloor())
             {
-                EmitSignal(SignalName.StateChange, "Run");
+                context.SetVelocity(new Vector2(0, 16));
+                EmitSignal(SignalName.StateChange, "Jump");
             }
-        }
+            else
+            {
+                if (dir.X != 0)
+                {
+                    EmitSignal(SignalName.StateChange, "Run");
+                }
+            }
+        }).CallDeferred();
 
     }
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://mvgie3ig0v4j"]
+[gd_scene load_steps=34 format=3 uid="uid://mvgie3ig0v4j"]
 
 [ext_resource type="Script" uid="uid://d1n3u3v800c2e" path="res://scenes/Characters/Player/Player.cs" id="1_smehm"]
 [ext_resource type="Texture2D" uid="uid://cwv0qsbug1qjl" path="res://assets/player/fall/0.png" id="2_4r5pv"]
@@ -30,6 +30,7 @@
 [ext_resource type="PackedScene" uid="uid://c1248a3a08f5u" path="res://scenes/StateMachine/state_machine.tscn" id="28_dt7fs"]
 [ext_resource type="PackedScene" uid="uid://diklffctgo3at" path="res://scenes/Characters/Player/state/player_idle_state.tscn" id="29_wqfne"]
 [ext_resource type="PackedScene" uid="uid://vrm8fxm58weh" path="res://scenes/Characters/Player/state/player_jump_state.tscn" id="30_wqfne"]
+[ext_resource type="PackedScene" uid="uid://u1jalifduw8n" path="res://scenes/Characters/Player/state/player_run_state.tscn" id="31_wnwbv"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jej6c"]
 animations = [{
@@ -43,7 +44,7 @@ animations = [{
 "duration": 0.1,
 "texture": ExtResource("5_a38lo")
 }, {
-"duration": 10.0,
+"duration": 1000.0,
 "texture": ExtResource("6_4ni07")
 }],
 "loop": false,
@@ -89,7 +90,7 @@ animations = [{
 "duration": 0.1,
 "texture": ExtResource("12_fulsm")
 }, {
-"duration": 10.0,
+"duration": 1000.0,
 "texture": ExtResource("13_4r5pv")
 }],
 "loop": false,
@@ -137,7 +138,7 @@ script = ExtResource("1_smehm")
 position = Vector2(9, -82.374)
 scale = Vector2(1, 0.992366)
 sprite_frames = SubResource("SpriteFrames_jej6c")
-animation = &"run"
+animation = &"jump"
 autoplay = "idle"
 speed_scale = 0.3
 
@@ -167,4 +168,7 @@ initialStateName = "Idle"
 player = NodePath("../..")
 
 [node name="PlayerJumpState" parent="StateMachine" node_paths=PackedStringArray("player") instance=ExtResource("30_wqfne")]
+player = NodePath("../..")
+
+[node name="PlayerRunState" parent="StateMachine" node_paths=PackedStringArray("player") instance=ExtResource("31_wnwbv")]
 player = NodePath("../..")
