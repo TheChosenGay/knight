@@ -7,7 +7,7 @@ namespace Knight.State.PlayerState;
 public partial class PlayerJumpState : PlayerState
 {
     private float jumpSpeed;
-    private bool isCanJump;
+    private bool isCanSecondJump;
     private bool isShorJumping;
     private float jumpDistance;
     private float jumpMoveSpeed; // 起跳后，左右移动的速度
@@ -26,7 +26,8 @@ public partial class PlayerJumpState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        isCanJump = false;
+
+        isCanSecondJump = true;
         jumpDistance = 0;
         context.SetVelocity(new Vector2(0, -jumpSpeed));
     }
@@ -36,7 +37,7 @@ public partial class PlayerJumpState : PlayerState
     public override void Exit()
     {
         base.Exit();
-        isCanJump = true;
+        isCanSecondJump = true;
         isShorJumping = false;
         jumpDistance = 0;
     }
@@ -56,8 +57,16 @@ public partial class PlayerJumpState : PlayerState
         { // 刚跳起阶段，判断是否为短跳
             isShorJumping = !Input.IsActionPressed("jump");
         }
+
+
         var realGravity = isShorJumping ? gravity * 5 : gravity;
         velocity.Y += realGravity * (float)delta;
+
+        if (isCanSecondJump && !isShorJumping && !context.IsOnFloor() && jumpDistance > 50 && Input.IsActionJustPressed("jump")) {
+            // 二段跳
+            isCanSecondJump = false;
+            velocity.Y += -jumpSpeed;
+        }
         velocity.Y = Mathf.Clamp(velocity.Y, -500, 500);
 
 
