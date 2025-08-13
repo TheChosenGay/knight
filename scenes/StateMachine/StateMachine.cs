@@ -83,6 +83,7 @@ public partial class StateMachine : Node
         {
             currentState.Exit();
             currentState = stateDict[stateName];
+            GD.Print("State Change: ", currentState.name);
             currentState.Enter();
         }
         else

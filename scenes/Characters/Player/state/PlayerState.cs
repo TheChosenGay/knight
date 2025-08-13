@@ -8,11 +8,13 @@ public interface IPlayerContextProtocol
     // 音频和动画相关
     public AnimatedSprite2D GetAnimationPlayer();
     public AudioStreamPlayer2D GetAudioStreamPlayer();
-    public void SetCollisionShapeSize(Vector2 size);
-    
+    public void SetCollisionShapeSize(Vector2 size, Vector2? pos = null);
+    public CollisionShape2D GetCollisionShape();
     // 逻辑判断相关
     public Vector2 GetDirection();
     public bool IsOnFloor();
+    public bool IsDash { get; set; }
+    public bool IsFaceRight { get; }
 
     // 移动相关
     public Vector2 GetVelocity();
@@ -48,8 +50,10 @@ public partial class PlayerState : State
 
     public virtual void PlayAnimation()
     {
+        context.GetAnimationPlayer().FlipH = !context.IsFaceRight;
         context.GetAnimationPlayer().Play(animationName);
     }
+
     public virtual void StopAnimation()
     {
         context.GetAnimationPlayer().Stop();

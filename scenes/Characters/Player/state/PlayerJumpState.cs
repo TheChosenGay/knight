@@ -98,10 +98,9 @@ public partial class PlayerJumpState : PlayerState
     {
         var animationName = velocity.Y > 0 ? "fall" : "jump";
         float shapeHeight = velocity.Y > 0 ? (float)120.0 : (float)134.0;
-        bool flipx = velocity.X < 0;
-        context.SetCollisionShapeSize(new Vector2((float)40.0, shapeHeight));
+        context.SetCollisionShapeSize(new Vector2((float)40.0, shapeHeight), null);
         context.GetAnimationPlayer().SpeedScale = (float)0.3;
-        context.GetAnimationPlayer().FlipH = flipx;
+        context.GetAnimationPlayer().FlipH = !context.IsFaceRight;
         context.GetAnimationPlayer().Play(animationName);
         if (animationName == "jump" && jumpDistance < 20 && velocity.Y < 0)
         {

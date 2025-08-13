@@ -70,7 +70,11 @@ public partial class PlayerRunState : PlayerState
         {
             EmitSignal(SignalName.StateChange, "Jump");
         }
-        else if (context.GetVelocity().X == 0)
+        else if (context.IsDash)
+        { 
+            EmitSignal(SignalName.StateChange, "Dash");
+        }
+        if (context.GetVelocity().X == 0)
         {
             EmitSignal(SignalName.StateChange, "Idle");
         }
